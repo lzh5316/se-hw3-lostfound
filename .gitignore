@@ -1,0 +1,19 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# ---- 编辑器 / 系统 ----
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+
+# ---- 作业材料提取的临时产物（_sources/ 里是从作业截图提取需求时生成的中间文件）----
+_sources/
+
+# ---- 本机临时文件 ----
+*.log
+~$*

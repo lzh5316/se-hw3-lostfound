@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>校园失物招领小程序 · 可点击原型</title>
+<style>
+  :root {
+    --primary: #2f6bff; --primary-soft: #e8efff; --bg: #f2f4f8;
+    --card: #fff; --text: #1f2430; --sub: #8a90a0; --line: #e6e9f0;
+    --found: #17b26a; --found-soft: #e7f8f0; --lost: #f79009; --lost-soft: #fff4e5;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 28px 16px 48px; background: #eef1f7;
+    font: 14px/1.6 "Microsoft YaHei", "PingFang SC", system-ui, sans-serif; color: var(--text);
+  }
+  h1 { font-size: 20px; text-align: center; margin: 0 0 6px; }
+  .tip { text-align: center; color: var(--sub); font-size: 12px; margin-bottom: 20px; }
+  .stage { display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; }
+  .phone {
+    width: 375px; height: 812px; background: var(--bg); border-radius: 34px;
+    box-shadow: 0 12px 32px rgba(31, 36, 48, .18); overflow: hidden; position: relative;
+    border: 8px solid #1b1f27; display: none;
+  }
+  .phone.on { display: block; }
+  .statusbar {
+    height: 24px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px; font-size: 11px; font-weight: 700; background: var(--card);
+  }
+  .navbar {
+    height: 44px; background: var(--card); display: flex; align-items: center;
+    justify-content: center; position: relative; font-size: 16px; font-weight: 700;
+    border-bottom: 1px solid var(--line);
+  }
+  .navbar .back { position: absolute; left: 16px; font-size: 18px; color: var(--text); cursor: pointer; }
+  .navbar .right { position: absolute; right: 16px; font-size: 13px; font-weight: 400; color: var(--primary); cursor: pointer; }
+  .body { height: 744px; overflow-y: auto; }
+  .search { margin: 8px 16px; height: 36px; border-radius: 18px; background: #eef1f7; display: flex; align-items: center; padding: 0 12px; gap: 8px; color: var(--sub); cursor: pointer; }
+  .tabs { display: flex; gap: 18px; padding: 6px 16px 0; background: var(--card); }
+  .tabs b { font-size: 14px; color: var(--sub); position: relative; padding-bottom: 6px; cursor: pointer; }
+  .tabs b.on { color: var(--primary); }
+  .tabs b.on::after { content: ""; position: absolute; left: 50%; bottom: 0; width: 20px; height: 3px; border-radius: 2px; background: var(--primary); transform: translateX(-50%); }
+  .list { padding: 10px 16px 90px; display: flex; flex-direction: column; gap: 12px; }
+  .card { background: var(--card); border-radius: 14px; padding: 12px; display: flex; gap: 12px; cursor: pointer; }
+  .thumb { width: 56px; height: 56px; border-radius: 12px; background: var(--primary-soft); color: var(--primary); font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none; }
+  .card .ttl { font-size: 14px; font-weight: 700; display: flex; justify-content: space-between; gap: 8px; }
+  .card .ttl span { font-size: 10px; font-weight: 400; color: var(--found); flex: none; }
+  .card .ttl span.lost { color: var(--lost); }
+  .card .ttl span.done { color: var(--sub); }
+  .card .row { margin-top: 6px; display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--sub); }
+  .tag { font-size: 10px; padding: 1px 6px; border-radius: 9px; background: var(--found-soft); color: var(--found); }
+  .tag.lost { background: var(--lost-soft); color: var(--lost); }
+  .card .more { margin-top: 6px; font-size: 10px; color: var(--sub); }
+  .fab {
+    position: absolute; right: 18px; bottom: 76px; height: 44px; padding: 0 18px;
+    border-radius: 22px; background: var(--primary); color: #fff; font-weight: 700;
+    display: flex; align-items: center; box-shadow: 0 6px 16px rgba(47, 107, 255, .35); cursor: pointer;
+  }
+  .tabbar {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 56px; background: var(--card);
+    border-top: 1px solid var(--line); display: flex;
+  }
+  .tabbar div { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10px; color: var(--sub); cursor: pointer; }
+  .tabbar div.on { color: var(--primary); }
+  .tabbar i { width: 18px; height: 18px; border-radius: 5px; background: currentColor; opacity: .85; }
+  .btn { height: 46px; border-radius: 23px; border: 0; width: 100%; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; }
+  .btn.primary { background: var(--primary); color: #fff; }
+  .btn.ghost { background: #fff; color: var(--primary); border: 1px solid var(--primary); }
+  .btn.soft { background: var(--primary-soft); color: var(--primary); }
+  .btnrow { display: flex; gap: 11px; padding: 12px 16px; }
+</style>
+</head>
+<body>
+<h1>校园失物招领小程序 · 可点击原型</h1>
+<p class="tip">点击页面里的卡片、按钮、底部导航即可切换界面；对应作业要求「查看信息→查看详情 / 发布信息→发布成功 / 搜索物品→查看搜索结果」。<br />
+墨刀在线原型（只读分享，无需登录）：<a href="https://modao.cc/proto/5AmeweAStm2iuwqkXScZBn/sharing?view_mode=read_only&amp;screen=rbpVWVSUILF2FBjjF" target="_blank" rel="noopener">modao.cc 分享链接</a></p>
+<div class="stage" id="stage"></div>
+
+<script>
+/* ------------------------------------------------------------------
+   可点击原型：6 个界面（首页 / 搜索 / 详情 / 发布 / 成功 / 我的发布）
+   只用一个 HTML 文件，双击就能在浏览器里演示、截图。
+------------------------------------------------------------------ */
+const ITEMS = [
+  { g: "卡", t: "校园卡（姓名：李同学）", tag: "招领", i: "三食堂二楼 · 今天 12:30", s: "待认领" },
+  { g: "钥", t: "钥匙一串（带蓝色钥匙扣）", tag: "寻物", i: "图书馆三楼 · 今天 09:15", s: "寻找中" },
+  { g: "伞", t: "黑色折叠伞", tag: "招领", i: "教学楼 A 区 205 · 昨天 18:40", s: "已归还" },
+  { g: "杯", t: "白色保温杯（贴有字母贴纸）", tag: "寻物", i: "体育馆更衣室 · 昨天 16:05", s: "寻找中" },
+  { g: "耳", t: "蓝牙耳机充电盒", tag: "招领", i: "运动场看台 · 前天 20:10", s: "待认领" }
+];
+
+// 发布表单里唯一可变的字段：带 * 的必填项。留空后再点「发 布」可以看到校验提示。
+let publishName = "校园卡";
+
+const card = (it, status) => `
+  <div class="card" onclick="go('detail')">
+    <div class="thumb">${it.g}</div>
+    <div style="flex:1">
+      <div class="ttl">${it.t}<span class="${it.s === "已归还" ? "done" : it.tag === "寻物" ? "lost" : ""}">${status || it.s}</span></div>
+      <div class="row"><span class="tag ${it.tag === "寻物" ? "lost" : ""}">${it.tag}</span>${it.i}</div>
+      <div class="more">点击查看详情 ›</div>
+    </div>
+  </div>`;
+
+const screens = {
+  home: { tab: 0, html: `
+    <div class="body">
+      <div class="search" onclick="go('search')">🔍 搜索物品名称，如：校园卡、钥匙、雨伞</div>
+      <div class="tabs"><b class="on">全部</b><b>招领</b><b>寻物</b></div>
+      <div class="list">${ITEMS.map((it) => card(it)).join("")}
+        <div style="text-align:center;color:var(--sub);font-size:11px">已加载全部 · 共 126 条信息</div>
+      </div>
+      <div class="fab" onclick="go('publish')">＋ 发布</div>
+      ${tabbar(0)}
+    </div>` },
+  search: { tab: 1, back: "home", html: `
+    <div class="body">
+      <div class="search" style="color:var(--text);font-weight:700">🔍 校园卡
+        <span style="margin-left:auto;color:var(--sub)">✕</span></div>
+      <div style="padding:12px 16px 0;color:var(--sub);font-size:12px">找到 3 条与「校园卡」相关的信息</div>
+      <div class="list">${[ITEMS[0],
+        { g: "卡", t: "校园卡（学号尾号 37，捡到的）", tag: "寻物", i: "紫金楼 B 座 401 · 今天 08:40", s: "寻找中" },
+        { g: "卡", t: "校园卡（已挂失，请勿使用）", tag: "招领", i: "校医院一楼大厅 · 昨天 10:20", s: "已归还" }
+      ].map((it) => card(it)).join("")}
+        <div style="text-align:center;color:var(--sub);font-size:11px">没有更多结果了，换个关键词试试？</div>
+      </div>
+      ${tabbar(1)}
+    </div>` },
+  detail: { back: "home", title: "信息详情", right: "分享", html: `
+    <div class="body" style="padding-bottom:12px">
+      <div style="height:176px;background:var(--primary-soft);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative">
+        <span class="tag" style="position:absolute;left:16px;top:12px">招领</span>
+        <div style="font-size:30px;font-weight:700;color:var(--primary);letter-spacing:8px">校园卡</div>
+        <div style="font-size:11px;color:#1f4fd8">（此处为上传的物品照片）</div>
+      </div>
+      <div style="padding:14px 16px 0">
+        <div style="font-size:17px;font-weight:700">校园卡（姓名：李同学）</div>
+        <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
+          <span class="tag" id="detailState">待认领</span>
+          <span style="font-size:11px;color:var(--sub)">发布于 今天 12:30</span>
+        </div>
+      </div>
+      <table style="width:100%;margin-top:14px;border-collapse:collapse;font-size:13px">
+        ${[["信息类型", "招领"], ["物品名称", "校园卡（尾号 37）"], ["拾取地点", "三食堂二楼"],
+           ["拾取时间", "今天 12:30"], ["联系方式", "微信 Lzh-5316"]]
+          .map(([k, v]) => `<tr><td style="padding:8px 16px;color:var(--sub);font-size:12px;width:96px">${k}</td>
+            <td style="padding:8px 0;font-weight:700">${v}</td></tr>`).join("")}
+      </table>
+      <div style="padding:4px 16px 0">
+        <div style="font-size:13px;font-weight:700">物品描述</div>
+        <p style="font-size:12px;color:#333a48">在三食堂二楼靠窗的位置捡到一张校园卡，卡面姓名李同学，学号尾号 37，已交到食堂一楼服务台备份登记，也可以直接联系我。</p>
+      </div>
+      <div class="btnrow">
+        <button class="btn ghost" onclick="toggleState()">修改状态</button>
+        <button class="btn primary" onclick="toast('已复制联系方式：微信 Lzh-5316')">联系发布者</button>
+      </div>
+    </div>` },
+  publish: { back: "home", title: "发布信息", html: () => `
+    <div class="body">
+      <div style="margin:16px;display:flex;background:#eef1f7;border-radius:10px;padding:4px">
+        <button class="btn" style="height:32px;background:transparent;color:var(--sub)" onclick="toast('已切换为「寻物」')">寻物</button>
+        <button class="btn soft" style="height:32px">招领</button>
+      </div>
+      <div style="background:#fff;margin:0 16px;border-radius:14px;padding:8px 16px">
+        ${[["物品名称 *", publishName, true], ["物品类型 *", "证件卡类 ▾"], ["拾取地点 *", "三食堂二楼"], ["拾取时间 *", "今天 12:30"]]
+          .map(([k, v, canClear]) => `<div style="display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)">
+            <span style="color:var(--sub);font-size:12px;width:80px;flex:none">${k}</span>
+            <b style="font-size:13px;flex:1;${v ? "" : "color:#f04438;font-weight:400"}">${v || "（必填，请填写）"}</b>
+            ${canClear ? `<span style="font-size:11px;color:var(--primary);flex:none" onclick="clearPublishName()">清空试试 ›</span>` : ""}</div>`).join("")}
+        <div style="display:flex;gap:16px;padding:14px 0">
+          <span style="color:var(--sub);font-size:12px;width:80px;flex:none">物品描述</span>
+          <span style="font-size:12px">放在二楼靠窗座位，卡面姓名李同学</span>
+        </div>
+        <div style="display:flex;gap:16px;padding:6px 0 14px;align-items:center">
+          <span style="color:var(--sub);font-size:12px;width:80px;flex:none">上传图片</span>
+          <div class="thumb" style="width:64px;height:64px">卡</div>
+          <div style="width:64px;height:64px;border:1px dashed #c9cfdd;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--sub);font-size:20px">＋</div>
+        </div>
+        <div style="display:flex;gap:16px;padding:0 0 14px;border-top:1px solid var(--line)">
+          <span style="color:var(--sub);font-size:12px;width:80px;flex:none;padding-top:12px">联系方式 *</span>
+          <b style="font-size:13px;padding-top:12px">微信 Lzh-5316</b>
+        </div>
+      </div>
+      <div style="margin:12px 16px;background:var(--lost-soft);color:#9a5b00;font-size:11px;border-radius:10px;padding:12px">
+        请勿在描述中填写他人隐私信息；发布后可在「我的发布」修改状态。
+      </div>
+      <div class="btnrow"><button class="btn primary" style="${publishName ? "" : "background:#c9cfdd"}" onclick="tryPublish()">发 布</button></div>
+    </div>` },
+  success: { title: "发布成功", html: `
+    <div class="body" style="text-align:center;padding-top:60px">
+      <div style="width:80px;height:80px;border-radius:50%;background:var(--found-soft);display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:36px;color:#12b76a">✓</div>
+      <div style="font-size:24px;font-weight:700;margin:20px 0 10px">发布成功！</div>
+      <p style="color:var(--sub);font-size:13px;margin:0 68px 22px">你的招领信息已经发布，其他同学可以在首页或通过搜索找到它。</p>
+      <div style="padding:0 24px;text-align:left">${card(ITEMS[0])}
+        <div style="color:var(--sub);font-size:12px;margin:16px 0 10px">接下来可以：</div>
+        <div class="btnrow" style="padding:0 0 12px"><button class="btn soft" onclick="go('mine')">查看我的发布</button></div>
+        <div class="btnrow" style="padding:0"><button class="btn primary" onclick="go('home')">返回首页</button></div>
+      </div>
+    </div>` },
+  mine: { tab: 3, back: "home", title: "我的发布", right: "筛选", html: `
+    <div class="body">
+      <div style="background:#fff;padding:10px 16px">
+        <div style="font-weight:700">我发布了 3 条信息</div>
+        <div style="color:var(--sub);font-size:11px">待认领 1 条 · 寻找中 1 条 · 已归还 1 条</div>
+      </div>
+      <div class="list">
+        ${ITEMS.slice(0, 3).map((it) => `<div>${card(it)}
+          <div class="btnrow" style="padding:10px 0 0;justify-content:flex-end">
+            <button class="btn ghost" style="width:76px;height:26px;font-size:11px" onclick="toast('状态已切换')">修改状态</button>
+            <button class="btn soft" style="width:96px;height:26px;font-size:11px" onclick="toast('已标记为「已归还」')">标记已归还</button>
+          </div></div>`).join("")}
+      </div>
+      ${tabbar(3)}
+    </div>` }
+};
+function tabbar(active) {
+  const names = ["首页", "搜索", "发布", "我的"];
+  const ids = ["home", "search", "publish", "mine"];
+  return `<div class="tabbar">${names.map((n, i) =>
+    `<div class="${i === active ? "on" : ""}" onclick="go('${ids[i]}')"><i></i>${n}</div>`).join("")}</div>`;
+}
+
+function render(id) {
+  const s = screens[id];
+  // 界面内容可以是字符串，也可以是函数——发布页要读表单里当前的值，所以用函数现算。
+  const body = typeof s.html === "function" ? s.html() : s.html;
+  document.getElementById("stage").innerHTML = `
+    <div class="phone on" id="p-${id}">
+      <div class="statusbar"><span>9:41</span><span>●●●● ⚡ ▮</span></div>
+      <div class="navbar">
+        ${s.back ? `<span class="back" onclick="go('${s.back}')">‹</span>` : ""}
+        <span>${s.title || "校园失物招领"}</span>
+        ${s.right ? `<span class="right" onclick="toast('原型演示：${s.right}')">${s.right}</span>` : ""}
+      </div>
+      ${body}
+    </div>`;
+  window.location.hash = id;
+}
+
+function go(id) { render(id); }
+
+function toggleState() {
+  const el = document.getElementById("detailState");
+  if (!el) return;
+  const next = el.textContent === "待认领" ? "已归还" : "待认领";
+  el.textContent = next;
+  el.style.background = next === "已归还" ? "#f2f4f8" : "var(--found-soft)";
+  el.style.color = next === "已归还" ? "var(--sub)" : "var(--found)";
+}
+
+// 演示「必填项为空」这条异常分支：点「清空试试 ›」把物品名称清掉，再点「发 布」会被拦下
+function clearPublishName() {
+  publishName = "";
+  render("publish");
+  toast("已清空「物品名称」——现在再点一次「发 布」看看");
+}
+
+function tryPublish() {
+  if (!publishName.trim()) {
+    toast("请先填写必填项：「物品名称」");
+    return;
+  }
+  go("success");
+}
+
+function toast(msg) {
+  const d = document.createElement("div");
+  d.textContent = msg;
+  d.style.cssText = "position:fixed;left:50%;bottom:60px;transform:translateX(-50%);" +
+    "background:rgba(31,36,48,.9);color:#fff;font-size:13px;padding:10px 18px;border-radius:20px;z-index:99";
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 1500);
+}
+
+const start = (location.hash || "#home").slice(1);
+render(screens[start] ? start : "home");
+</script>
+</body>
+</html>
